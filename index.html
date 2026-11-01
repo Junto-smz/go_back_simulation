@@ -1,12 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>帰省コストシミュレーション</title>
+    <meta name="description" content="京都からふるさとへ。目的地と年間の帰省回数から、交通費と移動時間の目安を計算できます。">
+    <meta name="theme-color" content="#f5f6f1">
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="app.js"></script>
 </head>
 <body>
-    <h1>帰省コストシミュレーション</h1>
-    <p>京都を起点に各都道府県の有力都市への交通費や所要時間を算出するサイトになります。</p>
+    <div class="page-shell">
+        <header class="site-header">
+            <a class="brand" href="./" aria-label="帰省コストシミュレーション ホーム">
+                <span class="brand-icon" aria-hidden="true">↗</span>
+                <span>かえりみち<span class="brand-caption">帰省コストシミュレーション</span></span>
+            </a>
+            <span class="origin-badge"><span class="status-dot"></span> 京都発の帰省プラン</span>
+        </header>
+
+        <main>
+            <section class="intro" aria-labelledby="page-title">
+                <p class="eyebrow">HOME IS A LITTLE CLOSER.</p>
+                <h1 id="page-title">「ただいま」までを、<br>ちょっと<span class="title-accent">計算。</span></h1>
+                <p class="intro-description">ふるさとに帰る、お金と時間。<br class="mobile-break">次の帰省を考える、小さなシミュレーター。</p>
+                <div class="journey-decoration" aria-hidden="true"><span>京都</span><span class="journey-line"></span><span class="little-house">⌂</span><span>ふるさと</span></div>
+            </section>
+
+            <div id="load-error" class="load-error" role="alert" hidden>
+                <p id="load-error-message"></p><button id="retry-button" type="button">もう一度読み込む</button>
+            </div>
+
+            <div class="simulator">
+                <section class="settings panel" aria-labelledby="settings-title">
+                    <div class="section-heading"><span class="step">01</span><h2 id="settings-title">帰省の予定を教えてください</h2></div>
+                    <p class="section-description">入力すると、計算結果がすぐに変わります。</p>
+                    <form id="trip-form">
+                        <fieldset id="input-fields" disabled>
+                            <div class="field-group">
+                                <label for="destination">目的先の都道府県</label>
+                                <div class="select-wrapper"><select id="destination" name="destination" required aria-describedby="destination-hint"><option value="">データを読み込んでいます…</option></select></div>
+                                <p class="field-hint" id="destination-hint">京都から各都道府県の主要都市への移動です。</p>
+                            </div>
+                            <div class="field-group frequency-group">
+                                <label for="trip-count">年間の帰省回数</label>
+                                <div class="number-control"><button id="decrease" type="button" aria-label="帰省回数を1回減らす">−</button><div class="number-value"><input id="trip-count" name="trips" type="number" min="0" step="1" value="3" required inputmode="numeric" aria-describedby="count-error frequency-hint"><span>回 / 年</span></div><button id="increase" type="button" aria-label="帰省回数を1回増やす">＋</button></div>
+                                <div class="presets" aria-label="帰省回数の候補"><button type="button" data-count="1" aria-pressed="false">年1回</button><button type="button" data-count="2" aria-pressed="false">年2回</button><button type="button" data-count="3" aria-pressed="true">年3回</button><button type="button" data-count="6" aria-pressed="false">年6回</button></div>
+                                <p class="field-hint" id="frequency-hint">お盆、お正月、連休。あなたのペースで。</p>
+                                <p class="input-error" id="count-error" hidden></p>
+                            </div>
+                        </fieldset>
+                    </form>
+                    <div class="starting-point"><span class="location-icon" aria-hidden="true">◎</span><div><span class="small-label">出発地</span><strong>京都</strong></div><span class="starting-point-note">すべてのプランの起点です</span></div>
+                </section>
+
+                <section class="results panel" aria-labelledby="results-title" aria-busy="true">
+                    <div class="section-heading"><span class="step">02</span><h2 id="results-title">あなたの帰省プラン</h2><span class="estimate-badge">概算</span></div>
+                    <div id="result-content" hidden>
+                        <div class="route"><span>京都</span><span class="route-arrow" aria-label="往復">⟷</span><strong id="result-destination">東京都</strong><span class="trip-badge" id="result-count">年3回</span></div>
+                        <div class="total-cost"><h3>年間の交通費</h3><p><span class="currency">¥</span><span id="total-cost">—</span><span class="per-year">/ 年</span></p><span class="cost-underline"></span></div>
+                        <div class="secondary-results"><div><h3><span aria-hidden="true">◷</span> 年間の移動時間</h3><p id="total-time">—</p></div><div><h3><span aria-hidden="true">▤</span> 月あたりの交通費</h3><p><span id="monthly-cost">—</span><span class="small-unit"> 円</span></p></div></div>
+                        <div class="trip-breakdown"><h3>1回の帰省あたり <span>往復</span></h3><dl><div><dt>交通費</dt><dd><span id="unit-cost">—</span> 円</dd></div><div><dt>移動時間</dt><dd id="unit-time">—</dd></div></dl></div>
+                        <p class="result-note">交通費・移動時間ともに、往復分 × 帰省回数で計算。</p>
+                    </div>
+                    <p id="result-placeholder" class="result-placeholder" role="status">帰省データを読み込んでいます…</p>
+                    <p id="result-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+                </section>
+            </div>
+
+            <aside class="data-note" aria-label="計算について"><span class="info-icon" aria-hidden="true">i</span><div><h2>このシミュレーションについて</h2><p>交通費と移動時間は、cost.json の値を1回の帰省（往復）分として計算しています。京都府はデータに含まれていないため選択できません。宿泊費・現地での移動費などは含みません。実際の運賃や所要時間は、利用する交通機関や時期によって異なります。</p></div></aside>
+        </main>
+        <footer><span>かえりみち</span><p>会いたい人に会いに行く。その一歩を、ここから。</p><span class="footer-source">DATA / cost.json</span></footer>
+    </div>
+    <noscript><p class="load-error">このシミュレーターを使うには、ブラウザーのJavaScriptを有効にしてください。</p></noscript>
 </body>
 </html>
